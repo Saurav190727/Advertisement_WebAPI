@@ -1,0 +1,346 @@
+﻿@page
+@model Advertisement_WebAPI.Pages.IndexModel
+@{
+}
+
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Job</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+</head>
+<style>
+    .card-body h5{
+        text-align:center;
+        color: blue;
+        font-size:25px;
+        padding:2px;
+        background-color:whitesmoke;
+
+    }
+    .card-body p{
+        text-align: center;
+        font-size: 15px;
+        color:black;
+        font-weight:500;
+    }
+    .card-body{
+        background-color:lightblue;
+    }
+    
+</style>
+<body>
+
+    <div>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+            <a class="navbar-brand" href="#">Jobs</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse p" id="navbarText">
+                <ul class="navbar-nav">
+                    <li class="nav-item active">
+                        <button class="btn btn-outline-dark" data-toggle="modal" data-target="#addJob">Add New Job</button>
+                    </li>
+
+                </ul>
+
+            </div>
+        </nav>
+
+
+        <div class="container">
+            <div class="row" id="allJobs">
+
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+    <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.min.js"></script>
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery.templates/beta1/jquery.tmpl.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <script>
+        var uri = 'api/Jobs';
+
+        $(document).ready(function () {
+            // Gets all Jobs
+            $.getJSON(uri)
+                .done(function (data) {
+
+                    $("#jobsTemplate").tmpl(data).appendTo("#allJobs");
+                });
+        });
+
+
+
+        function getAllJobs() {
+
+               $.getJSON(uri)
+                   .done(function (data) {
+
+                       $("#allJobs").text("");
+
+                    $("#jobsTemplate").tmpl(data).appendTo("#allJobs");
+                });
+
+        }
+
+        function addJob() {
+            var _job_role = $('#job_role').val();
+            var _job_type = $('#job_type').val();
+            var _job_salary = parseInt($('#job_salary').val());
+            var _job_description = $('#job_description').val();
+
+
+
+            var job = {
+                job_role :  _job_role,
+                job_type :_job_type,
+                job_salary: _job_salary,
+                Job_description: _job_description
+
+
+            };
+
+            $.ajax({
+                type: "POST",
+                url: uri,
+                data: JSON.stringify(job),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#result").html("Success");
+                getAllJobs();
+            }).fail(function (jqXHR, textStatus) {
+                          $("#result").html("An error occured when adding the Job.");
+               });
+
+
+
+
+        }
+
+
+
+
+
+        function updateJob() {
+            var _id = parseInt($('#_id').val());
+            var _job_role = $('#_job_role').val();
+            var _job_type = $('#_job_type').val();
+            var _job_salary = parseInt($('#_job_salary').val());
+            var _job_description = $('#_job_description').val();
+
+
+            var job = {
+                id : _id,
+                job_role :  _job_role,
+                job_type :_job_type,
+                job_salary: _job_salary,
+                job_description : _job_description
+
+
+            };
+
+            $.ajax({
+                type: "PUT",
+                url: uri+"/"+ $('#_id').val(),
+                data: JSON.stringify(job),
+                contentType: "application/json; charset=utf-8"
+            }).done(function (response) {
+                $("#resultUpdate").html("Success");
+                getAllJobs();
+            }).fail(function (jqXHR, textStatus) {
+                          $("#resultUpdate").html("An error occured When updating Job");
+               });;
+
+
+
+
+        }
+
+
+
+        function remove(id) {
+
+
+          var yes =  confirm("Are you sure you want to delete this Job?");
+
+            if (yes) {
+                $.ajax({
+                    type: "DELETE",
+                    url: uri + "/" + id,
+
+                }).done(function (response) {
+
+                    getAllJobs();
+                });
+
+            }
+
+
+        }
+
+
+
+
+
+        function getJobForUpdate(id) {
+
+             $.ajax({
+                type: "GET",
+                url: uri+"/"+id,
+               contentType: "application/json"
+             }).done(function (response) {
+
+                  $('#_id').val(response.id);
+                 $('#_job_role').val(response.job_role) ;
+                 $('#_job_type').val(response.job_type);
+                 $('#_job_salary').val(response.job_salary);
+                 $('#_job_description').val(response.job_description);
+
+
+
+
+
+            });
+
+
+        }
+    </script>
+
+
+
+    <script id="jobsTemplate" type="text/x-jquery-tmpl">
+
+        <div class="col-lg-12" style="margin:10px;">
+            <div class="card border-secondary" style="width: 60rem;">
+
+                <div class="card-body ">
+                    <h5 class="card-job_role"> ${job_role}</h5>
+                    <p class="card-text">Job Type :  ${job_type}</p>
+                    <p class="card-text">Salary : ${job_salary}</p>
+                    <p class="card-text">Description : ${job_description}</p>
+
+                </div>
+                <button class="btn btn-outline-dark" onclick="getJobForUpdate('${id}')" data-toggle="modal" data-target="#updateJob">Update</button>
+                <a href="#" class="btn btn-outline-danger" onclick="remove('${id}')">Delete</a>
+            </div>
+        </div>
+
+    </script>
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="addJob">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-job_role">Add New Job</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="name">Job</label>
+                            <input type="text" class="form-control" id="job_role" aria-describedby="emailHelp" placeholder="exp: Data Entry">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Job Type</label>
+                            <input type="text" class="form-control" id="job_type" aria-describedby="emailHelp" placeholder="exp: Part Time / Full Time ">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Salary</label>
+                            <input type="number" class="form-control" id="job_salary" aria-describedby="emailHelp" placeholder="exp: 20">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Description</label>
+                            <input type="text" class="form-control" id="job_description" aria-describedby="emailHelp" placeholder="exp: Job Role ">
+
+                        </div>
+
+
+                        <div class="form-group" id="result">
+
+
+                        </div>
+                        <button type="button" onclick="addJob()" class="btn btn-secondary">Add Job</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <div class="modal" tabindex="-1" role="dialog" id="updateJob">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-job_role">Update Job</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+
+                        <div class="form-group">
+
+                            <input type="hidden" class="form-control" id="_id" aria-describedby="emailHelp">
+
+                        </div>
+                        <div class="form-group">
+                            <label for="name">Job</label>
+                            <input type="text" class="form-control" id="_job_role" aria-describedby="emailHelp" >
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Job Type</label>
+                            <input type="text" class="form-control" id="_job_type" aria-describedby="emailHelp" >
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Salary</label>
+                            <input type="number" class="form-control" id="_job_salary" aria-describedby="emailHelp" >
+
+                        </div>
+                        <div class="form-group">
+                            <label for="model">Description</label>
+                            <input type="text" class="form-control" id="_job_description" aria-describedby="emailHelp" >
+
+                        </div>
+
+
+                        <div class="form-group" id="resultUpdate">
+
+
+                        </div>
+                        <button type="button" onclick="updateJob()" class="btn btn-primary">Update Record</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
